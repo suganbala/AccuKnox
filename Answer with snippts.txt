@@ -1,0 +1,108 @@
+TOPIC : CUSTOM CLASSES
+
+Description: You are tasked with creating a Rectangle class with the following requirements:
+
+snippets : example.py
+
+
+	class Rectangle:
+    		def __init__(self, length: int, width: int):
+        		self.length = length
+        		self.width = width
+    
+    		def __iter__(self):
+        		return iter([{'length': self.length}, {'width': self.width}])
+
+	
+	rect = Rectangle(10, 5)
+	for attribute in rect:
+    		print(attribute) 
+
+
+Special Method : 1: __init__ initation or Constructor : which initlize an value given as arguments or keyword_arguments to the function
+		 2:__iter__ iteration special method : used as iter value in dictionary value
+
+
+
+
+
+
+
+TOPIC : DJANGO SIGNALS
+
+1) By Default is Django signals executed Synchronously or Asynchronously 
+
+	Ans : By default Django signals are synchronous if we needed we can async by using threading concept . synchronous signals - it means the signal handler run immediately when signal triggered and completed then the next execution start 
+
+snippets : signals.py
+
+		import time
+		from django.db.models.signals import post_save
+		from django.dispatch import receiver
+		from django.contrib.auth.models import User
+
+		@receiver(post_save, sender=User)
+		def signal_handler(sender, instance, **kwargs):
+    			print("Signal handler started")
+    			time.sleep(5)
+    			print("Signal handler completed")
+
+		print("Creating user")
+		User.objects.create(username="sugan")
+		print("User created successfully!")
+
+Explanation :
+	
+	* pre build signals are in " django.db.models.signals " modules like post_save, pre_save, pre_delete, post_delete and m2m_changed . here i used post_saved it execute after the user is created
+	
+	*" receiver " is an decorator which connect function to Django signals in here " signal handler " is an function ." @receiver(post_save, sender=User) " it modify the behavior which it send signal to user when new user created it execute the function
+
+		
+	* "from django.contrib.auth.models import User " User module has direct connection to Django admin users it  used as an database
+ 
+
+	* "User.objects.create(username="sugan")" it is an instance of new user when this event occurs the Django signals execute
+
+
+
+
+2)   Do Django signals run in the same thread as the caller
+
+	ans : Yes by defaul Django signals run in the same thread as the caller. This can be verified by checking the thread information in both the caller and signal handler.
+
+snippts : signals.py
+	
+		import threading
+		from django.db.models.signals import post_save
+		from django.dispatch import receiver
+		from myapp.models import MyModel
+
+		@receiver(post_save, sender=MyModel)
+			def check_thread(sender, instance, **kwargs):
+    			print(f" Signal handler running in thread: {threading.current_thread().name}")
+
+
+
+
+
+
+3)  Do Django signals run in the same database transaction as the caller
+
+	avs :  Yes Do Django signals run in the same database transaction as the caller
+
+snippets: signals.py
+  
+		from django.db.models.signals import post_save
+		from django.dispatch import receiver
+		from myapp.models import MyModel
+
+		@receiver(post_save, sender=MyModel)
+		def signal_handler(sender, instance, **kwargs):
+    			instance.name = "Changed by Signal"
+    			instance.save()
+   			print("Signal handler  changed")
+
+
+
+		
+
